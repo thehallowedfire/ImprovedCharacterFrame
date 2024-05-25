@@ -1,0 +1,12 @@
+## Interface: 40400
+## Title: Improved Character Frame
+## Notes: Improves default Character Frame
+## Author: Vladislav Kondrashov
+## Version: 0.0.1
+## SavedVariablesPerCharacter: ICF_SETTINGS
+
+Localization\ruRU.lua
+
+ItemQuality.lua
+AdditionalStats.lua
+Init.lua
