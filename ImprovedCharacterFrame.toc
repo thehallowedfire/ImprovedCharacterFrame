@@ -7,6 +7,8 @@
 
 Localization\ruRU.lua
 
+Fixes.lua
+
 ItemQuality.lua
 AdditionalStats.lua
 Init.lua

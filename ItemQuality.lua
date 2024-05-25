@@ -67,12 +67,3 @@ function ICF.UpdateAllItemQuality()
         ICF.SetItemQuality(id);
     end
 end
-
-
--- TEMP FIX for weapons slots coordinates
-function ICF.FixWeaponsSlots()
-    local button = CharacterMainHandSlot
-    local size = button:GetSize()
-    local _, _, _, currentX, currentY = button:GetPoint()
-    button:SetPoint("BOTTOMLEFT", PaperDollItemsFrame, "BOTTOMLEFT", currentX - size / 2, currentY)
-end

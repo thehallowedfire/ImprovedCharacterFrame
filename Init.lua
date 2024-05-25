@@ -5,8 +5,10 @@ ICF.f = CreateFrame("Frame");
 if IsAddOnLoaded("Blizzard_CharacterFrame") then
     PaperDollFrame:HookScript("OnShow", ICF.UpdateAllItemQuality);
 
-    -- Temporary fix for weapons slots coordinates
+    -- FIXES
     ICF.FixWeaponsSlots()
+    ICF.FixStatBgStripes()
+    ICF.FixMissingCVars()
 else
     ICF.f:RegisterEvent("ADDON_LOADED");
 end
@@ -16,8 +18,10 @@ ICF.f:SetScript("OnEvent", function(self, event, arg1)
         PaperDollFrame:HookScript("OnShow", ICF.UpdateAllItemQuality);
         ICF.f:UnregisterEvent("ADDON_LOADED");
 
-        -- Temporary fix for weapons slots coordinates
+        -- FIXES
         ICF.FixWeaponsSlots()
+        ICF.FixStatBgStripes()
+        ICF.FixMissingCVars()
     elseif event == "PLAYER_EQUIPMENT_CHANGED" then
         ICF.ClearItemQuality(arg1);
         ICF.SetItemQuality(arg1);
