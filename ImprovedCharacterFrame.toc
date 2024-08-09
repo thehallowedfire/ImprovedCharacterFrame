@@ -2,7 +2,7 @@
 ## Title: Improved Character Frame
 ## Notes: Improves default Character Frame
 ## Author: Vladislav Kondrashov
-## Version: 0.0.1
+## Version: 0.0.2
 ## SavedVariablesPerCharacter: ICF_SETTINGS
 
 Localization\ruRU.lua
