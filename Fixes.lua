@@ -10,16 +10,6 @@ local ICF_DEFAULT_SETTINGS = {
     },
 };
 
-function ICF_GetSetting(setting)
-    if ICF_SETTINGS == nil then
-        ICF_SETTINGS = {};
-        for k, v in pairs(ICF_DEFAULT_SETTINGS) do
-            ICF_SETTINGS[k] = v;
-        end
-    end
-    return ICF_SETTINGS[setting]
-end
-
 function ICF.FixWeaponsSlots()
     local button = CharacterMainHandSlot;
     local size = button:GetSize();
@@ -51,50 +41,75 @@ function ICF.FixStatBgStripes()
     end);
 end
 
-local function ICF_CopyCVarValueToSavedVariables(cvar)
-    print("debug4")
-    local value = C_CVar.GetCVar(cvar);
-    local savedCvars = ICF_GetSetting("CVars")
-    print("debug", cvar, value, savedCvars[cvar])
-    if cvar == "statCategoriesCollapsed" or cvar == "statCategoriesCollapsed_2" then
-        for i=1, 7 do
-            savedCvars[cvar][i] = C_CVar.GetCVarBitfield(cvar, i);
-        end
-    else
-        savedCvars[cvar] = value
+local function ICF_SaveDefaultCVars()
+    ICF_SETTINGS = {};
+    ICF_SETTINGS["CVars"] = {};
+    for k, v in pairs(ICF_DEFAULT_SETTINGS["CVars"]) do
+        ICF_SETTINGS["CVars"][k] = v;
     end
-    print("debug2", value, savedCvars[cvar])
 end
-function ICF.FixMissingCVars()
-    if C_CVar.GetCVar("characterFrameCollapsed") == nil then
-        C_CVar.RegisterCVar("characterFrameCollapsed", "1");
 
-        C_CVar.RegisterCVar("statCategoryOrder", "");
-        C_CVar.RegisterCVar("statCategoryOrder_2", "");
-
-        C_CVar.RegisterCVar("statCategoriesCollapsed");
-        C_CVar.RegisterCVar("statCategoriesCollapsed_2");
-        for i=1, 7 do
-            C_CVar.SetCVarBitfield("statCategoriesCollapsed", i, false);
-            C_CVar.SetCVarBitfield("statCategoriesCollapsed_2", i, false);
+local REGULAR_CVARS = {
+    "characterFrameCollapsed",
+    "statCategoryOrder",
+    "statCategoryOrder_2"
+};
+local BITFIELD_CVARS = {
+    "statCategoriesCollapsed",
+    "statCategoriesCollapsed_2"
+};
+local function tcontains(tbl, x)
+    for _, v in ipairs(tbl) do
+        if v == x then
+            return true
         end
     end
---[[ 
-    -- Apply settings from SavedVariables
-    print("debug3 >", "current state:", C_CVar.GetCVar("characterFrameCollapsed"), "new state:", ICF_GetSetting("CVars")["characterFrameCollapsed"])
-    C_CVar.SetCVar("characterFrameCollapsed", ICF_GetSetting("CVars")["characterFrameCollapsed"])
-    C_CVar.SetCVar("statCategoryOrder", ICF_GetSetting("CVars")["statCategoryOrder"])
-    C_CVar.SetCVar("statCategoryOrder_2", ICF_GetSetting("CVars")["statCategoryOrder_2"])
-    for i=1, 7 do
-        C_CVar.SetCVarBitfield("statCategoriesCollapsed", i, ICF_GetSetting("CVars")["statCategoriesCollapsed"][i]);
-        C_CVar.SetCVarBitfield("statCategoriesCollapsed_2", i, ICF_GetSetting("CVars")["statCategoriesCollapsed_2"][i]);
+    return false
+end
+
+function ICF.CheckMissingCVars()
+    if C_CVar.GetCVar("characterFrameCollapsed") == nil then
+        for _, cvar in ipairs(REGULAR_CVARS) do
+            C_CVar.RegisterCVar(cvar);
+        end
+        for _, cvar in ipairs(BITFIELD_CVARS) do
+            C_CVar.RegisterCVar(cvar);
+        end
+    end
+end
+
+function ICF.RestoreCurrentCharCvars()
+    if ICF_SETTINGS == nil then
+        ICF_SaveDefaultCVars();
     end
 
-    -- Hook CVars changes in order to save them per character via SavedVariables
-    if CharacterFrameExpandButton then
-        CharacterFrameExpandButton:HookScript("OnClick", function(self)
-            print("debug Expand button on click")
-            ICF_CopyCVarValueToSavedVariables("characterFrameCollapsed")
-        end);
-    end ]]
+    for _, cvar in ipairs(REGULAR_CVARS) do
+        C_CVar.SetCVar(cvar, ICF_SETTINGS["CVars"][cvar])
+    end
+    for _, cvar in ipairs(BITFIELD_CVARS) do
+        for i=1, 7 do
+            C_CVar.SetCVarBitfield(cvar, i, ICF_SETTINGS["CVars"][cvar][i])
+        end
+    end
+end
+
+function ICF.SaveCVar(name, value, index)
+    if tcontains(REGULAR_CVARS, name) then
+        ICF_SETTINGS["CVars"][name] = value;
+    elseif tcontains(BITFIELD_CVARS, name) then
+        ICF_SETTINGS["CVars"][name][index] = value;
+    end
+end
+
+function ICF.HookCVarsChange()
+    hooksecurefunc("SetCVar", function(name, value)
+        if tcontains(REGULAR_CVARS, name) then
+            ICF.SaveCVar(name, value);
+        end
+    end);
+    hooksecurefunc("SetCVarBitfield", function(name, index, value)
+        if tcontains(BITFIELD_CVARS, name) then
+            ICF.SaveCVar(name, value, index);
+        end
+    end);
 end

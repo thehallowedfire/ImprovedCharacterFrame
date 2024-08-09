@@ -36,7 +36,7 @@ local function ICF_SetItemButtonBorderVertexColor(button, r, g, b)
 end
 
 local function ICF_SetItemButtonQuality(button, quality)
-    if button then
+    if button and quality ~= 0 then
         local hasQuality = quality or BAG_ITEM_QUALITY_COLORS[quality];
         if hasQuality then
             ICF_SetItemButtonBorder(button, [[Interface\Common\WhiteIconFrame]]);
